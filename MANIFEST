@@ -1,0 +1,8 @@
+Changes
+MANIFEST
+Makefile.PL
+README
+lib/ensure.pm
+t/00-load.t
+t/pod.t
+t/tests.t
