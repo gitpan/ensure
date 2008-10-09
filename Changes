@@ -1,6 +1,10 @@
 Revision history for pragma ensure
 
-1.07   6-Oct-2008 21:17:00 +0100
+1.08  10-Oct-2008  0:19:00 +0100
+
+        * removed world writeable permissions.
+
+1.07   9-Oct-2008 21:19:00 +0100
 
         * cleaned up test suite to work in more environments.
 
