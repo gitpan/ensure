@@ -1,4 +1,15 @@
 Revision history for pragma ensure
 
-1.05      15-Aug-2008 13:50:00 +0100
-        First release version, sprung on an unsuspecting world.
+1.07   6-Oct-2008 21:17:00 +0100
+
+        * cleaned up test suite to work in more environments.
+
+        * tightened what is checked to avoid more "system" names.
+
+        * now detects debugger and turns off checks in 'main'.
+
+1.06  Not released.
+
+1.05  15-Aug-2008 13:50:00 +0100
+
+      First release version, sprung on an unsuspecting world.

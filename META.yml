@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                ensure
-version:             1.05
+version:             1.07
 abstract:            Pragma to ensure that subroutines and exports are defined, at compile-time.
 license:             ~
 author:              

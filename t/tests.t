@@ -1,10 +1,30 @@
+##########################################################################################
+#
+# Testing for module ensure v1.07 -- GMCH 9-Oct-2008
+
 use strict ;
 use warnings ;
 
-use constant TESTS => 23 ;
+use constant TESTS => 23 ;	# After we're sure about the version of Perl
 
-my @tests = () ;
-my @files = () ;
+use Test::More tests => TESTS + 1 ;
+
+# Make sure we can run a copy of Perl
+
+my $perl = $^X ;
+
+{ my $want = "sprintf(\"$perl -- v%vd\", \$^V)" ;
+  my $get  = `$perl -w -e 'print $want'` ;
+  my $have = eval $want ;
+
+  if ($get eq $have) { pass("Testing under '$get'") ;                   }
+                else { BAIL_OUT("Running '$have', but got '$get' ??") ; } ;
+} ;
+
+# Here we work through the __DATA__ below and construct the tests -- see below.
+
+my @tests = () ;		# Each test is [file, expectations, ....]
+my @files = () ;		# Files we created, so we can delete them at the end
 my $FH    = undef ;
 my $test  = undef ;
 
@@ -51,17 +71,21 @@ if (scalar(@tests) != TESTS) {
   BAIL_OUT("Have ".scalar(@tests)." tests but expected ".TESTS) ;
 } ;
 
-use Test::More tests => TESTS ;
+# Now we run the tests.
+#
+# Two basic forms, those with an explicit '.pl', and those that use a dummy.
 
 foreach my $test (@tests) {
-  my $pl = shift(@$test) ;
+  my $name = shift(@$test) ;
+
+  my $pl = $name ;
 
   if ($pl =~ s/\.pm$//) {
     $pl =~ s/[\\\/]/::/g ;
     $pl = "-e 'use strict; use warnings; use ensure; use $pl;'" ;
   } ;
 
-  my @result = split(/\n/, `perl $pl 2>&1`) ;
+  my @result = split(/\n/, `$perl -w $pl 2>&1`) ;
 
   my @diag = () ;
   my $i = 0 ;
@@ -79,11 +103,11 @@ foreach my $test (@tests) {
   } ;
 
   if (@diag) {
-    diag("Failed $test\n  ", join("\n  ", @diag)) ;
-    fail($test) ;
+    diag("Failed $name\n  ", join("\n  ", @diag)) ;
+    fail($name) ;
   }
   else {
-    pass($test) ;
+    pass($name) ;
   } ;
 } ;
 
@@ -769,6 +793,14 @@ use ensure ;
 
 our @EXPORT = qw(snap delta) ;
 
+# Filtering out stash entries we don't want to worry about
+
+sub filter {
+  my ($key) = @_ ;
+  return ($key =~ /^\w+$/)	# want only simple names
+      && ($key !~ /^[_\d]/) ;	# and not stuff starting '_' or digit
+} ;
+
 # Take snap shot of state of given package's stash.
 
 sub snap {
@@ -776,7 +808,7 @@ sub snap {
 
   my $st = do { no strict 'refs' ; *{$pkg.'::'}{HASH} ; } ;
 
-  return [$pkg, $st, [keys %$st]] ;
+  return [$pkg, $st, [grep filter($_), keys %$st]] ;
 } ;
 
 # See what has appeared in the stash, and delete it.
@@ -797,9 +829,9 @@ sub delta {
 
   my %was = map { ($_, 1) } @$was ;
 
-  my @keys = sort keys %$st ;
+  my @keys = sort(grep filter($_), keys %$st) ;
   foreach my $key (@keys) {
-    if (!$was{$key} && ($key !~ /\:\:$/) && ($key =~ /^\w/) && ($key !~ /^\d/)) {
+    if (!$was{$key}) {
 
       if (length($delta)+length($key) > 80) {
         print STDERR $delta, "\n" ;

@@ -7,7 +7,7 @@ use 5.006 ; use v5.8.8 ;  # Not tested for anything less
 use strict ;
 use warnings ;
 
-our $VERSION = '1.05' ;
+our $VERSION = '1.07' ;
 
 #=========================================================================================
 
@@ -333,15 +333,21 @@ CHECK {
   # MODIFY_xxx_ATTRIBUTES appear and are undefined if a variable is declared ': shared'.
 
   my %except = map { ($_, 1) } (qw(a b BEGIN UNITCHECK CHECK INIT END
-                                   DESTROY AUTOLOAD __ANON__
+                                   DESTROY AUTOLOAD
                                    MODIFY_SCALAR_ATTRIBUTES
                                    MODIFY_ARRAY_ATTRIBUTES
                                    MODIFY_HASH_ATTRIBUTES)) ;
-                                 # ENV INC ARGV ARGVOUT SIG STDIN STDOUT STDERR _)) ;
 
   # Run checks across all registered packages
 
   foreach my $pkg (sort keys(%packages)) {
+
+    # Debug introduces a number of undefined things in 'main', which just get in the way
+
+    if (($^D || $^P) && ($pkg eq 'main')) {
+      print STDERR "+++ NB: Debug prevents ensure check for '$pkg'\n" ;
+      next ;
+    } ;
 
     # Collect any 'no ensure' names
 
@@ -355,12 +361,14 @@ CHECK {
     my $stash = $packages{$pkg} ; # Stash for package
 
     NAME: foreach my $name (sort keys %$stash) {
-      if (($name !~ m/^\w/) || ($name =~ m/^\d/)  # Ignore names which are not simple...
+      if (($name =~ m/^(?:__|_?\W|_?\d)/)         # Ignore names which are not simple...
                             || $except{$name}     # ...or which are exceptional
                             || $undefined{$name}) # ...or which are declared 'no ensure'
         { next NAME ; } ;
 
       my $rv = $stash->{$name} ;  # Get the stash entry
+
+      next if !defined($rv);      # Ignore undefined stash entries
 
       # OK if stash entry is ref() (=> is 5.10.0 or later 'constant')
       #    or if have a {CODE} value -- these are the commonest cases !
@@ -471,7 +479,7 @@ I wouldn't disagree.  But in the meantime...
 
 =head1 VERSION
 
-Version 1.05.
+Version 1.07.
 
 =head1 SYNOPSIS
 
@@ -568,12 +576,19 @@ an undefined subroutine C<fred>, but it will if it has any other value.
 I<[This could be improved if I knew how to spot subroutine names that have
 been used, but not defined.]>
 
-The check ignores names that do not start with an alphabetic character or C<'_'>.  It also
-ignores a number of names which appear in package symbol tables and are often undefined:
+The check ignores names that contain any characters other than letters, digits or '_'
+(ie C<\w>), and names that start with a digit or more than one '_'.  It also ignores a
+number of names which appear in package symbol tables and are often undefined:
 
     a  b
-    BEGIN  UNITCHECK  CHECK  INIT  END  DESTROY   AUTOLOAD   __ANON__
+    BEGIN  UNITCHECK  CHECK  INIT  END  DESTROY  AUTOLOAD
     MODIFY_SCALAR_ATTRIBUTES  MODIFY_ARRAY_ATTRIBUTES  MODIFY_HASH_ATTRIBUTES
+
+this stops C<ensure> from throwing out "system" things.
+
+The Perl debugger adds a number of things to module C<main>'s symbol table, some of
+which appear undefined when the check runs.  To avoid being obstructive, the check is
+suppressed for C<main> when the debugger is detected, and a warning issued.
 
 =head3 C<main> package C<SCALAR> variables
 
