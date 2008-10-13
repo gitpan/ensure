@@ -6,7 +6,7 @@ Packages which 'use ensure' are checked to ensure that there are no
 undefined subroutines and that all things which are exported are
 defined.
 
-This is version 1.08.
+This is version 1.09.
 
 INSTALLATION
 

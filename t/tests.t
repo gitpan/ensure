@@ -1,6 +1,23 @@
 ##########################################################################################
 #
-# Testing for module ensure v1.07 -- GMCH 9-Oct-2008
+# Testing for module ensure
+#
+#   v1.09  13-Oct-2008
+#
+#            * fixed delta() in t::Imports to not include '&' for CODE elements.
+#
+#   v1.08  10-Oct-2008
+#
+#            * fixed test that $^X works to avoid being fooled by exotic characters in
+#              $^X -- in particular '@' and '$' !
+#
+#   v1.07   9-Oct-2008
+#
+#            * changed how Perl is invoked to use $^X
+#
+#   v1.06  Not released
+#
+#   v1.05  15-Aug-2008  -- initial public release 
 
 use strict ;
 use warnings ;
@@ -11,11 +28,11 @@ use Test::More tests => TESTS + 1 ;
 
 # Make sure we can run a copy of Perl
 
-my $perl = $^X ;
+my $perl = $^X ;  
 
-{ my $want = "sprintf(\"$perl -- v%vd\", \$^V)" ;
-  my $get  = `$perl -w -e 'print $want'` ;
-  my $have = eval $want ;
+{ my $want  = "sprintf(\"%s -- v%vd\", \$^X, \$^V)" ;
+  my $get   = `$perl -w -e 'print $want'` ;
+  my $have  = eval $want ;
 
   if ($get eq $have) { pass("Testing under '$get'") ;                   }
                 else { BAIL_OUT("Running '$have', but got '$get' ??") ; } ;
@@ -847,7 +864,7 @@ sub delta {
         } ;
         if (defined(*$rv{ARRAY})) { $delta .= " \@$key" ; $n++ ; } ;
         if (defined(*$rv{HASH} )) { $delta .= " \%$key" ; $n++ ; } ;
-        if (defined(*$rv{CODE} )) { $delta .= " \&$key" ; $n++ ; } ;
+        if (defined(*$rv{CODE} )) { $delta .=   " $key" ; $n++ ; } ;
         if ($n == 0)              { $delta .= " \*$key" ;        } ;
       } ;
       delete $st->{$key} ;

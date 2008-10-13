@@ -7,7 +7,7 @@ use 5.006 ; use v5.8.8 ;  # Not tested for anything less
 use strict ;
 use warnings ;
 
-our $VERSION = '1.08' ;
+our $VERSION = '1.09' ;
 
 #=========================================================================================
 
@@ -479,7 +479,7 @@ I wouldn't disagree.  But in the meantime...
 
 =head1 VERSION
 
-Version 1.08.
+Version 1.09.
 
 =head1 SYNOPSIS
 

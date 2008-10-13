@@ -1,8 +1,15 @@
 Revision history for pragma ensure
 
+1.09  13-Oct-2008 11:47:00 +0100
+
+        * further improvements to test suite for varied environments.
+
 1.08  10-Oct-2008  0:19:00 +0100
 
-        * removed world writeable permissions.
+        * removed some world writeable permissions.
+
+        * fixed tests to allow $^X ($EXECUTABLE_NAME) to contain more exotic
+          characters.
 
 1.07   9-Oct-2008 21:19:00 +0100
 
