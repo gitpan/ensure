@@ -1,5 +1,9 @@
 Revision history for pragma ensure
 
+1.10  14-Oct-2008 21:50:00 +0100
+
+        * further test suite fixes for WIN32 
+
 1.09  13-Oct-2008 11:47:00 +0100
 
         * further improvements to test suite for varied environments.

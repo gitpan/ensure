@@ -2,6 +2,10 @@
 #
 # Testing for module ensure
 #
+#   v1.10  14-Oct-2008
+#
+#            * finally arranged to get tests to run in WIN32 environment.
+#
 #   v1.09  13-Oct-2008
 #
 #            * fixed delta() in t::Imports to not include '&' for CODE elements.
@@ -28,10 +32,10 @@ use Test::More tests => TESTS + 1 ;
 
 # Make sure we can run a copy of Perl
 
-my $perl = $^X ;  
+my $perl = $^X ; if ($perl =~ m/\s/) { $perl = '"'.$perl.'"' ; } ; 
 
-{ my $want  = "sprintf(\"%s -- v%vd\", \$^X, \$^V)" ;
-  my $get   = `$perl -w -e 'print $want'` ;
+{ my $want  = "sprintf('%s -- v%vd', \$^X, \$^V)" ;
+  my $get   = `$perl -w -e "print $want"` ;
   my $have  = eval $want ;
 
   if ($get eq $have) { pass("Testing under '$get'") ;                   }
@@ -99,7 +103,7 @@ foreach my $test (@tests) {
 
   if ($pl =~ s/\.pm$//) {
     $pl =~ s/[\\\/]/::/g ;
-    $pl = "-e 'use strict; use warnings; use ensure; use $pl;'" ;
+    $pl = "-e \"use strict; use warnings; use ensure; use $pl;\"" ;
   } ;
 
   my @result = split(/\n/, `$perl -w $pl 2>&1`) ;
